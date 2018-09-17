@@ -22,12 +22,14 @@ class CacheService
      */
     public function __construct($host, $port, $prefix)
     {
-        $this->client = new Predis\Client([
-            'host'   => $host,
-            'port'   => $port
-        ], [
-            'prefix' => $prefix.":"
-        ]);
+	
+	$this->client = new Predis\Client([
+	    'host'   => $host,
+	    'port'   => $port
+	], [
+	    'prefix' => $prefix.":"
+	]);  
+	
     }
 
     /**
@@ -48,15 +50,19 @@ class CacheService
      */
     public function getAll()
     {
-        $keys = $this->client->keys('*');
-        $values = [];
-        foreach ($keys as $key => $value) {
-            $value = substr($value, strpos($value, ':')+1);
-            $val = json_decode($this->client->get($value), true);
-            $val['_id'] = ['$oid' => $value];
-            $values[] = $val;
+        try {        
+            $keys = $this->client->keys('*');
+            $values = [];
+            foreach ($keys as $key => $value) {
+                $value = substr($value, strpos($value, ':')+1);
+                $val = json_decode($this->client->get($value), true);
+                $val['_id'] = ['$oid' => $value];
+                $values[] = $val;
+            }
+            return $values;
+        } catch(\Exception $e) {
+            return false;
         }
-        return $values;
     }
 
     /**
@@ -68,7 +74,11 @@ class CacheService
      */
     public function set($key, $value)
     {
-        return $this->client->set($key, $value);
+        try {        
+            return $this->client->set($key, $value);
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
     /**
@@ -79,7 +89,11 @@ class CacheService
      */
     public function del($key)
     {
-        return $this->client->delete($key);
+        try {        
+            return $this->client->delete($key);
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
     /**
@@ -89,6 +103,10 @@ class CacheService
      */
     public function delAll()
     {
-        return $this->client->flushDb();
+        try {        
+            return $this->client->flushDb();
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 }

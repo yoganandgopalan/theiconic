@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-
+use Exception;
 class CustomersController extends Controller
 {
     /**
@@ -15,14 +15,18 @@ class CustomersController extends Controller
      * @Method("GET")
      */
     public function getAction()
-    {
+    {     
         $cacheService = $this->get('cache_service');
         $customers = $cacheService->getAll();
-
+	
         if (empty($customers)) {
             $database = $this->get('database_service')->getDatabase();
             $customers = $database->customers->find();
             $customers = iterator_to_array($customers);
+            foreach ($customers as $customer) {
+                $user = ['name' => $customer['name'], 'age' => $customer['age']];
+                $cacheService->set($customer['_id'], json_encode($user));
+            }
         }
 
         return new JsonResponse($customers);
