@@ -22,9 +22,31 @@ class CustomersControllerFunctionalTest extends WebTestCase
             ['name' => 'Alex', 'age' => 18],
         ];
         $customers = json_encode($customers);
+        $this->client->request('POST', '/customers/', [], [], ['CONTENT_TYPE' => 'application/json'],$customers);
+        $this->assertSame(200, $this->client->getResponse()->getStatusCode());
+        $this->assertTrue($this->client->getResponse()->isSuccessful());
+    }
 
-        $this->client->request('POST', '/customers/', [], [], ['CONTENT_TYPE' => 'application/json'], $customers);
+    public function testListCustomers()
+    {
+        $this->client->request('GET', '/customers/', [], [], ['CONTENT_TYPE' => 'application/json']);
+        $this->assertSame(200, $this->client->getResponse()->getStatusCode());
+        print_r($this->client->getResponse()->getContent());
+        $this->assertTrue($this->client->getResponse()->isSuccessful());
+    }
 
+    public function testDeleteCustomers()
+    {
+        $this->client->request('DELETE', '/customers/', [], [], ['CONTENT_TYPE' => 'application/json']);
+        $this->assertSame(200, $this->client->getResponse()->getStatusCode());
+        $this->assertTrue($this->client->getResponse()->isSuccessful());
+    }
+
+    public function testGetCustomers()
+    {
+        $this->client->request('GET', '/customers/', [], [], ['CONTENT_TYPE' => 'application/json']);
+        $this->assertSame(200, $this->client->getResponse()->getStatusCode());
+        $this->assertEquals('[]',$this->client->getResponse()->getContent());
         $this->assertTrue($this->client->getResponse()->isSuccessful());
     }
 }
